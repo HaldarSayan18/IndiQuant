@@ -1,5 +1,5 @@
 'use client';
-import { api } from '@/lib/api';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 
 const NFTs = () => {
@@ -10,7 +10,7 @@ const NFTs = () => {
     useEffect(() => {
         const fectchNFTs = async () => {
             try {
-                const response = await api.get(`/api/nfts/details`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/nfts/details`);
                 // console.log(response.data.data[0]);
                 setNftData(response.data.data);
             } catch (error) {

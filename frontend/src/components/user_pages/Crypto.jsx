@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import CandleStick from "../layouts/charts/CryptoCandleStick";
-import { api } from "@/lib/api";
+import axios from "axios";
 
 export default function CryptoComponent() {
     const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ export default function CryptoComponent() {
     const fetchCryptoData = useCallback(async () => {
         try {
             // setLoading(true);
-            const response = await api.get('/api/crypto');
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/crypto`);
             const result = response.data;
             setCryptos(result.data);
         } catch (error) {
@@ -56,7 +56,7 @@ export default function CryptoComponent() {
     // fetch crypto ohlc data
     const showCryptoDetails = async (coin_id) => {
         try {
-            const response = await api.get(`/api/crypto/${coin_id}/history`);
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/crypto/${coin_id}/history`);
             const result = response.data;
             console.log('coin details---', result.data);
             setSelectedCoinId(coin_id);
