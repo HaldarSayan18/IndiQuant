@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server';
 
 export function proxy(request) {
     const path = request.nextUrl.pathname;
+    const tokenVal = request.cookies.get('token')?.value || '';
 
-    if (path === '/') {
+    if (path === '/' && tokenVal) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
-
-    const tokenVal = request.cookies.get('token')?.value || '';
+    if (path === '/' && !tokenVal) {
+        return NextResponse.next();
+    }
     const isPrivatePath =
         path.startsWith('/dashboard/portfolio') ||
         path.startsWith('/dashboard/alerts') ||
