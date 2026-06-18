@@ -1,10 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
-// const PUBLIC_ROUTES = ['/', '/register', '/dashboard', '/dashboard/stocks', '/dashboard/crypto', '/dashboard/nfts'];
-
-export function proxy(request) {
+export function middleware(request) {
     const path = request.nextUrl.pathname;
-    // const isPublicPath = PUBLIC_ROUTES.includes(path);
 
     const tokenVal = request.cookies.get('token')?.value || '';
     const isPrivatePath =
