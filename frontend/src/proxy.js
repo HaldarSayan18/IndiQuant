@@ -27,6 +27,7 @@ export function proxy(request) {
 // See matching paths
 export const config = {
     matcher: [
+        '/',
         '/dashboard/:path*',
     ],
 }
