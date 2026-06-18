@@ -1,6 +1,6 @@
 'use client';
 import CandleStick from '@/components/layouts/charts/StockCandleStick';
-import { api } from '@/lib/api';
+import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -38,15 +38,15 @@ export default function Page() {
         const showDetails = async (symbol) => {
             try {
                 // setLoading(true);
-                const response = await api.get(`/api/stocks/stock-details`);
+                const response = await axios.get(`https://indiquant-production.up.railway.app/api/stocks/stock-details`);
                 const result = response?.data;
                 // console.log('stock details response ==>', result);
                 setStocksPannel(result?.data);
-                const response1 = await api.get(`/api/crypto`);
+                const response1 = await axios.get(`https://indiquant-production.up.railway.app/api/crypto`);
                 const result1 = response1?.data;
                 // console.log('stock details response ==>', result1);
                 setCryptoPannel(result1?.data);
-                const response2 = await api.get(`/api/nfts/details`);
+                const response2 = await axios.get(`https://indiquant-production.up.railway.app/api/nfts/details`);
                 const result2 = response2?.data;
                 // console.log('stock details response ==>', result2);
                 setNFTPannel(result2?.data);
