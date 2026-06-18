@@ -18,12 +18,11 @@ app.use(cors({
     origin: [process.env.CLIENT_URL, 'http://localhost:3000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    preflightContinue: false,
 }));
 
-app.options('*', cors()); 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // db connection
 connectDB();
