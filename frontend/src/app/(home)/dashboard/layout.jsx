@@ -201,7 +201,7 @@ export default function Page({ children }) {
                                     <p className="hidden md:flex lg:flex items-center justify-center">{user.fullname}</p>
                                 </div>
                             ) : (
-                                <button className="border border-gray-600 rounded-md bg-[#51515148] px-3 py-1 transition-all duration-500 ease-in-out animate-pulse hover:animate-none hover:-translate-y-1" onClick={() => { router.push('/'); }}>Your Demat Account</button>
+                                <button className="border border-gray-600 rounded-md bg-[#51515148] px-3 py-1 transition-all duration-500 ease-in-out animate-pulse hover:animate-none hover:-translate-y-1" onClick={() => { router.push('/login'); }}>Your Demat Account</button>
                             )}
                         </div>
                     </div>
