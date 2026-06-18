@@ -1,5 +1,6 @@
 'use client';
 import Footer from '@/components/layouts/Footer';
+import { api } from '@/lib/api';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -41,7 +42,7 @@ const Page = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const result = await axios.get('http://localhost:5000/api/stock/AAPL');
+                const result = await api.get(`/api/stock/AAPL`);
                 const data = await result.data;
                 console.log(data);
             } catch (error) {

@@ -1,4 +1,4 @@
-import axios from "axios";
+import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 
@@ -10,7 +10,7 @@ export default function CandleStick({ symbol, heading, isZoomed, isShow }) {
     useEffect(() => {
         const fetchHistoryData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/stocks/${symbol}/history?range=${range}`);
+                const response = await api.get(`/api/stocks/${symbol}/history?range=${range}`);
                 const history = response.data;
                 // console.log('history data==', history.data);
                 const candles = history.data.map(candle => ({

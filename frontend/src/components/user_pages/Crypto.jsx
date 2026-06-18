@@ -1,9 +1,8 @@
 'use client';
-
-import axios from "axios";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import CandleStick from "../layouts/charts/CryptoCandleStick";
+import { api } from "@/lib/api";
 
 export default function CryptoComponent() {
     const [loading, setLoading] = useState(true);
@@ -39,7 +38,7 @@ export default function CryptoComponent() {
     const fetchCryptoData = useCallback(async () => {
         try {
             // setLoading(true);
-            const response = await axios.get('http://localhost:5000/api/crypto');
+            const response = await api.get('/api/crypto');
             const result = response.data;
             setCryptos(result.data);
         } catch (error) {
@@ -57,7 +56,7 @@ export default function CryptoComponent() {
     // fetch crypto ohlc data
     const showCryptoDetails = async (coin_id) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/crypto/${coin_id}/history`);
+            const response = await api.get(`/api/crypto/${coin_id}/history`);
             const result = response.data;
             console.log('coin details---', result.data);
             setSelectedCoinId(coin_id);

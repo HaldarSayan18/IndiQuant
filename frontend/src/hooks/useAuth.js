@@ -1,7 +1,7 @@
 'use client';
-import axios from "axios";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { api } from "@/lib/api";
 
 export function useAuth() {
     const [user, setUser] = useState(null);
@@ -18,7 +18,7 @@ export function useAuth() {
                     return;
                 }
                 // get user details
-                const res = await axios.get('http://localhost:5000/api/auth/me', {
+                const res = await api.get('/api/auth/me', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

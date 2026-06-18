@@ -1,8 +1,8 @@
 'use client';
-import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import SimpleAreaChart from "../layouts/charts/AreaChart";
 import CandleStick from "../layouts/charts/StockCandleStick";
+import { api } from "@/lib/api";
 
 export default function StocksComponent() {
     const [stocks, setStocks] = useState([]);
@@ -42,7 +42,7 @@ export default function StocksComponent() {
             if (targetPage === 1) setLoading(true);
             else setLoadingMore(true);
             // api call with pagination and search query params
-            const response = await axios.get(`http://localhost:5000/api/stocks/stock-details?page=${targetPage}&limit=100&search=${query}`);
+            const response = await api.get(`/api/stocks/stock-details?page=${targetPage}&limit=100&search=${query}`);
             const result = response.data;
             setStocks(prev => isAppend ? [...prev, ...result.data] : result.data);
             setHasMore(result.hasMore);
@@ -78,7 +78,7 @@ export default function StocksComponent() {
     const showStockDetails = async (symbol) => {
         try {
             // setLoading(true);
-            const response = await axios.get(`http://localhost:5000/api/stocks/${symbol}`);
+            const response = await api.get(`/api/stocks/${symbol}`);
             const result = response.data;
             // console.log('stock details response ==>', result);
             setStockDetails(result.data);

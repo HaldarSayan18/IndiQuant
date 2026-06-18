@@ -1,4 +1,4 @@
-import axios from "axios";
+import { api } from "@/lib/api";
 import { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 
@@ -10,7 +10,7 @@ export default function CandleStick({ data, coin_id }) {
     useEffect(() => {
         const fetchHistoryData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/api/crypto/${coin_id}/history?range=${range}`);
+                const response = await api.get(`/api/crypto/${coin_id}/history?range=${range}`);
                 const history = response.data;
                 console.log('history data candlestick', history.data[range]);
                 const candles = history.data[range].map(candle => ({
