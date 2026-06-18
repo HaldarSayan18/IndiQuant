@@ -4,12 +4,10 @@ export function proxy(request) {
     const path = request.nextUrl.pathname;
     const tokenVal = request.cookies.get('token')?.value || '';
 
-    if (path === '/' && tokenVal) {
+    if (path === '/login' && tokenVal) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
-    if (path === '/' && !tokenVal) {
-        return NextResponse.next();
-    }
+
     const isPrivatePath =
         path.startsWith('/dashboard/portfolio') ||
         path.startsWith('/dashboard/alerts') ||
@@ -21,7 +19,7 @@ export function proxy(request) {
     //     return NextResponse.redirect(new URL('/settings', request.url))
     // }
     if (isPrivatePath && !tokenVal) {
-        return NextResponse.redirect(new URL('/', request.url))
+        return NextResponse.redirect(new URL('/login', request.url))
     }
     return NextResponse.next();
 }
@@ -30,6 +28,7 @@ export function proxy(request) {
 export const config = {
     matcher: [
         '/',
+        '/login',
         '/dashboard/:path*',
     ],
 }
