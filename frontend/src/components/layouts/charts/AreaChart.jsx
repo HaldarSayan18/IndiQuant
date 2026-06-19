@@ -1,7 +1,8 @@
+'use client';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { RechartsDevtools } from '@recharts/devtools';
-import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
 
 const SimpleAreaChart = ({ symbol }) => {
     const [range, setRange] = useState("1y");
@@ -10,7 +11,7 @@ const SimpleAreaChart = ({ symbol }) => {
     useEffect(() => {
         const fetchHistoryData = async () => {
             try {
-                const response = await api.get(`/api/stocks/${symbol}/history?range=${range}`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/stocks/${symbol}/history?range=${range}`);
                 const history = response.data;
                 // console.log('history data==', history.data);
                 const formattedHistory = history.data.map(item => ({

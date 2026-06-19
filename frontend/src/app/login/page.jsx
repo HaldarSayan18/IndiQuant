@@ -94,7 +94,7 @@ export default function Home() {
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
-          <div className="flex w-full items-center justify-center -mt-1 gap-1">No account? <p className="text-blue-500 hover:cursor-pointer" onClick={() => router.push('/register')}>Register</p></div>
+          <div className="flex w-full items-center justify-center -mt-1 gap-1">No account? <p className="text-blue-500 hover:cursor-pointer" onClick={() => router.push('/register')}>Signup</p></div>
         </form>
       </div>
     </div>
