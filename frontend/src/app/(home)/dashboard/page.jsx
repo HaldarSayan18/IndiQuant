@@ -32,7 +32,6 @@ export default function Page() {
         },
     ];
 
-    // news api
     useEffect(() => {
         // show stock-details
         const showDetails = async (symbol) => {
@@ -58,9 +57,10 @@ export default function Page() {
         };
         showDetails();
 
+        // news api
         const fetchNews = async () => {
             try {
-                const response = await axios.get(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${process.env.NEXT_PUBLIC_NEWS_API_KEY}`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/news`);
                 // console.log('news data---', response.data.articles);
                 setNews(response.data.articles);
             } catch (error) {
@@ -150,11 +150,11 @@ export default function Page() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                 {/* candlestick chart */}
                 <div>
                     <p>AAPL Price Chart</p>
-                    <CandleStick symbol={symbol} heading='hidden' isZoomed={true} isShow={false}/>
+                    <CandleStick symbol={symbol} heading='hidden' isZoomed={true} isShow={false} />
                 </div>
                 {/* ai-picks widget */}
                 <div>

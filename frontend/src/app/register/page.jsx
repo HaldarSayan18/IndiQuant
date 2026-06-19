@@ -117,7 +117,7 @@ export default function Register() {
                     >
                         {loading ? 'Creating your account...' : 'Create Demat Account'}
                     </button>
-                    <div className="flex w-full items-center justify-center -mt-1 gap-1">Already have one? <p className="text-blue-500 hover:cursor-pointer" onClick={() => router.push('/')}>Signin</p></div>
+                    <div className="flex w-full items-center justify-center -mt-1 gap-1">Already have one? <p className="text-blue-500 hover:cursor-pointer" onClick={() => router.push('/login')}>Signin</p></div>
                 </form>
             </div>
         </div>
