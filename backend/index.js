@@ -2,6 +2,7 @@ import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
 import connectDB from './utils/db.js';
+import newsRoutes from './routes/news.js';
 import alertsRoutes from './routes/alerts.js';
 import aiSuggestRoutes from './routes/aiSuggest.js';
 import ordersRoutes from './routes/order.js';
@@ -29,6 +30,8 @@ connectDB();
 
 // auth
 app.use('/api/auth', authRoutes);
+// news
+app.use('/api/news', newsRoutes);
 // stock
 app.use('/api/stocks', stockRoutes);
 // crypto
