@@ -7,6 +7,26 @@ import { Alert } from '../models/Alert.js';
 
 const router = express.Router();
 
+// all orders
+router.get('/orders', auth, adminOnly, async (req, res) => {
+    try {
+        const orders = await Orders.find().sort({ createdAt: -1 });
+        res.status(200).json({ success: true, orders });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// all alerts
+router.get('/alerts', auth, adminOnly, async (req, res) => {
+    try {
+        const alerts = await Alert.find().sort({ createdAt: -1 });
+        res.status(200).json({ success: true, alerts });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // users list
 router.get('/users', auth, adminOnly, async (req, res) => {
     try {

@@ -1,6 +1,9 @@
 import express from 'express';
 import { auth } from '../middlewares/auth.js';
 import { Alert } from '../models/Alert.js';
+import { sendAlertEmail } from '../services/emailService.js';
+import { User } from '../models/User.js';
+import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
 
@@ -17,12 +20,15 @@ router.post('/', auth, async (req, res) => {
 
         const alert = await Alert.create({
             userId: req.user.id,
+            alertId:`ALERT-${uuidv4()}`,
             symbol: symbol.toUpperCase(),
             type,
             targetPrice,
             market: market || 'stock',
-        })
-
+        });
+        // send closing confirmation email
+        const user = await User.findById(req.user.id);
+        await sendAlertEmail({ to: user.email, alert });
         res.status(201).json({ success: true, alert });
     } catch (error) {
         res.status(500).json({ success: true, error: error.message });

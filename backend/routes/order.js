@@ -50,7 +50,7 @@ router.patch('/:order_id/close', auth, async (req, res) => {
         if (!closedPrice || closedPrice <= 0)
             return res.status(400).json({ success: false, error: 'Valid exit price required.' });
 
-        const order = await Orders.findOne({ id: req.params.orderId, userId: req.user.id });
+        const order = await Orders.findOne({ orderId: req.params.order_id, userId: req.user.id });
         if (!order)
             return res.status(404).json({ success: false, error: "Order not found!" });
         if (order.status === 'closed')
@@ -73,7 +73,7 @@ router.patch('/:order_id/close', auth, async (req, res) => {
 
 // delete an order
 router.delete('/:order_id', auth, async (req, res) => {
-    const order = await Orders.findOneAndDelete({ _id: req.params.order_id, userId: req.user.id });
+    const order = await Orders.findOneAndDelete({ orderId: req.params.order_id, userId: req.user.id });
     if (!order)
         return res.status(400).json({ success: false, error: 'Order not found!' });
     res.status(200).json({ success: true, deleted: true });
