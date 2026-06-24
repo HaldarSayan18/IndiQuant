@@ -3,8 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import SimpleAreaChart from "../layouts/charts/AreaChart";
 import CandleStick from "../layouts/charts/StockCandleStick";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function StocksComponent() {
+    const router = useRouter();
+    const { user, isLoggedIn } = useAuth();
     const [stocks, setStocks] = useState([]);
     const [stockDetails, setStockDetails] = useState([]);
     const [page, setPage] = useState(1);
@@ -12,29 +16,6 @@ export default function StocksComponent() {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [hasMore, setHasMore] = useState(true);
-
-    const cardsData = [
-        {
-            title: "S&P 500",
-            value: 6,
-            status: "+0.8% today"
-        },
-        {
-            title: "NASDAQ",
-            value: 4,
-            status: "+1.1% today"
-        },
-        {
-            title: "Dow Jones",
-            value: 2,
-            status: "-0.2% today"
-        },
-        {
-            title: "Watchlist",
-            value: 2,
-            status: "saved symbols"
-        },
-    ];
 
     // fetch stocks data from api endpoint and set to state
     const fetchStockData = useCallback(async (targetPage, query = "", isAppend = "") => {
@@ -59,12 +40,42 @@ export default function StocksComponent() {
         })();
     }, [fetchStockData]);
 
+
+    const cardsData = [
+        {
+            title: "Total Stocks",
+            value: stocks.length,
+        },
+        {
+            title: "Total Price",
+            value: `$${stocks.reduce((total, stock) => total + (stock.price || 0), 0).toFixed(2)}`,
+        },
+        {
+            title: isLoggedIn ? user.fullname : "Dow Jones",
+            value: 2,
+        },
+        {
+            title: "Market",
+            value: "US",
+        },
+    ];
+
     // search handler for stock symbols
     const filteredStocks = stocks.filter(stock => stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()));
     const handleSearch = (event) => {
         setSearchQuery(event.target.value);
         setPage(1);
         fetchStockData(1, event.target.value, false);
+    };
+
+    // handle order
+    const handleOrder = (stock) => {
+        console.log(stock.id);
+        const params = new URLSearchParams({
+            market: 'stock',
+            name: stock.symbol,
+        });
+        router.push(`/dashboard/orders?${params.toString()}`);
     };
 
     const handleLoadMore = () => {
@@ -115,7 +126,6 @@ export default function StocksComponent() {
                     <div key={index} className="w-full md:w-[80%] lg:w-[90%] border-0 rounded-md px-1 py-4 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] flex flex-col items-center justify-center transition-all duration-300 hover:scale-[1.05] cursor-default">
                         <p className="whitespace-nowrap">{item.title}</p>
                         <p className="whitespace-nowrap">{item.value}</p>
-                        <p className={`whitespace-nowrap ${item.status.startsWith('+') ? 'text-green-500' : item.status.startsWith('-') ? 'text-red-500' : 'text-gray-500'}`}>{item.status}</p>
                     </div>
                 ))}
             </div>
@@ -181,7 +191,7 @@ export default function StocksComponent() {
                                                     Details
                                                 </button>
                                                 <button type="button" className="border px-2 rounded-md shadow-2xl text-gray-400 hover:text-[#cca649] hover:cursor-pointer"
-                                                // onClick={() => showStockDetails(stock.symbol)}
+                                                    onClick={() => handleOrder(stock)}
                                                 >
                                                     Order
                                                 </button>
@@ -232,7 +242,7 @@ export default function StocksComponent() {
                                 <div className={`h-full flex flex-col items-center justify-between border-0 px-4 py-2`}>
                                     {/* <SimpleAreaChart symbol={stockDetails.symbol === undefined ? 'A' : stockDetails.symbol} /> */}
                                     <SimpleAreaChart symbol={stockDetails.symbol} />
-                                    <CandleStick symbol={stockDetails.symbol} heading='flex' isZoomed={false} isShow={true}/>
+                                    <CandleStick symbol={stockDetails.symbol} heading='flex' isZoomed={false} isShow={true} />
                                 </div>
                             </>
                         ))}

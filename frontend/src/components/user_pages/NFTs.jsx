@@ -1,47 +1,48 @@
 'use client';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react'
 
 const NFTs = () => {
-    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [nftData, setNftData] = useState([]);
 
-    useEffect(() => {
-        const fectchNFTs = async () => {
-            try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/nfts/details`);
-                // console.log(response.data.data[0]);
-                setNftData(response.data.data);
-            } catch (error) {
-                console.log('Failed to fetch nfts', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fectchNFTs();
+    const fetchNFTs = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/nfts/details`);
+            // console.log(response.data.data[0]);
+            setNftData(response.data.data);
+        } catch (error) {
+            console.log('Failed to fetch nfts', error);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+    useEffect(() => {
+        (async () => {
+            await fetchNFTs();;
+        })()
+    }, [fetchNFTs]);
 
     const cardsData = [
         {
-            title: "Total market volume",
-            value: '$2.41T',
-            status: "+2.8% today"
+            title: "Total floor price",
+            // value: `$${nftData.reduce((total, nft) => total + (nft.floor_price || 0), 0).toFixed(2)}`
         },
         {
             title: "24h volume",
-            value: '$98.4B',
-            status: "+11% vs yesterday"
+            value: '$98.4B'
         },
         {
             title: "Collectios tracked",
-            value: nftData.length,
-            status: "via Coingecko API"
+            value: nftData.length
         },
         {
             title: "Active nfts",
-            value: nftData.length,
-            status: ""
+            value: nftData.length
         },
     ];
 
@@ -50,10 +51,15 @@ const NFTs = () => {
         setSearchQuery(event.target.value);
     };
 
-    // nft details handler
-    const showNFTDetails = async (e) => {
-        e.preventDefault();
-    }
+    // handle order
+    const handleOrder = (nft) => {
+        // console.log(nft.id);
+        const params = new URLSearchParams({
+            market: 'nft',
+            name: nft.name,
+        });
+        router.push(`/dashboard/orders?${params.toString()}`);
+    };
 
     return (
         <div className="grid grid-cols-1 gap-3 border-0 p-0 text-gray-300">
@@ -66,11 +72,11 @@ const NFTs = () => {
                 </p>
                 <div className="flex items-center justify-center gap-2 ml-auto">
                     <input type="search" placeholder="search nfts..." className="hidden md:flex lg:flex border border-gray-500 p-2 rounded-md outline-none bg-[#51515148] focus-within:ring-1 focus-within:ring-gray-500 focus-within:border-gray-500" onChange={handleSearch} />
-                    <button className="border flex px-3 py-2 rounded-md transition-all duration-100 group hover:text-[#cca649]">
+                    <button onClick={fetchNFTs} className={`border flex px-3 py-2 rounded-md transition-all duration-100 group hover:text-[#cca649] ${loading ? 'cursor-not-allowed' : 'cursor-default'}`}>
                         <svg className="w-6 h-6 group-hover:text-[#cca649] dark:text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4" />
                         </svg>
-                        Refresh
+                        {loading ? 'Refreshing..' : 'Refresh'}
                     </button>
                 </div>
             </div>
@@ -81,7 +87,6 @@ const NFTs = () => {
                     <div key={index} className="w-full md:w-[80%] lg:w-[90%] border-0 rounded-md px-1 py-4 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] flex flex-col items-center justify-center gap-1 transition-all duration-300 hover:scale-[1.05] cursor-default text-sm md:text-md lg:text-[16px]">
                         <div className="whitespace-nowrap">{item.title}</div>
                         <p className="whitespace-nowrap">{item.value}</p>
-                        <p className={`whitespace-nowrap ${item.status.startsWith('+') ? 'text-green-500' : item.status.startsWith('-') ? 'text-red-500' : 'text-gray-500'}`}>{item.status}</p>
                     </div>
                 ))}
             </div>
@@ -130,7 +135,7 @@ const NFTs = () => {
                                                 Details
                                             </button>
                                             <button type="button" className="border px-2 rounded-md shadow-2xl text-gray-400 hover:text-[#cca649] hover:cursor-pointer"
-                                                onClick={() => showNFTDetails(nft.id)}
+                                                onClick={() => handleOrder(nft)}
                                             >
                                                 Order
                                             </button>

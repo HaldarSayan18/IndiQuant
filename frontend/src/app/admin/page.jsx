@@ -10,6 +10,8 @@ const Page = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]);
+    const [orders, setOrders] = useState([]);
+    const [alerts, setAlerts] = useState([]);
     const [currentUser, setCurrentUser] = useState([]);
     const [analytics, setAnalytics] = useState(null);
     const [search, setSearch] = useState('');
@@ -19,17 +21,21 @@ const Page = () => {
     const fetchAdminData = useCallback(async () => {
         setLoading(true);
         try {
-            const [userResp, analyticsResp, currentResp] = await Promise.all([
+            const [userResp, analyticsResp, currentResp, ordersResp, alertsResp] = await Promise.all([
                 api.get(`/api/admin/users`),
                 api.get(`/api/admin/analytics`),
                 api.get(`/api/auth/me`),
+                api.get(`/api/admin/orders`),
+                api.get(`/api/admin/alerts`),
             ]);
-            // console.log(currentResp.data.id);
+            console.log(ordersResp.data);
             // console.log(userResp.data.users[0]._id);
             console.log(analyticsResp.data.analytics);
             setUsers(userResp.data.users);
             setAnalytics(analyticsResp.data.analytics);
             setCurrentUser(currentResp.data);
+            setOrders(ordersResp.data.orders);
+            setAlerts(alertsResp.data.alerts);
         } catch (error) {
             console.error('Error fetching admin data', error);
         } finally {
@@ -168,9 +174,6 @@ const Page = () => {
                 <div className='border-0 grid grid-cols-1 md:grid-cols-5 lg:grid-cols-5 gap-2 h-auto p-2'>
                     {/* new registration chart */}
                     {/* <div className='border-0 shadow-2xl cursor-default md:col-start-1 md:col-end-4 lg:col-start-1 lg:col-end-4 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] flex flex-col items-start justify-start rounded-md p-2 h-75 overflow-y-auto custom-scrollbar'>
-                        <p className='mb-2'>New signups - Last 15 days</p>
-                    </div> */}
-                    <div className='border-0 shadow-2xl cursor-default md:col-start-1 md:col-end-4 lg:col-start-1 lg:col-end-4 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] flex flex-col items-start justify-start rounded-md p-2 h-75 overflow-y-auto custom-scrollbar'>
                         <p className='mb-2'>New signups - Last 30 days</p>
                         {!loading && analytics?.recentSignups?.length > 0 ? (
                             <div className="w-full flex items-end justify-between gap-2 h-40 px-2">
@@ -194,23 +197,10 @@ const Page = () => {
                         ) : (
                             !loading && <p className="text-gray-500 text-xs">No signups in the last 30 days.</p>
                         )}
-                    </div>
+                    </div> */}
 
                     {/* recent activity */}
                     {/* <div className='border-0 shadow-2xl cursor-default md:col-start-4 md:col-end-6 lg:col-start-4 lg:col-end-6 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] flex flex-col items-start justify-start rounded-md p-2 h-75 overflow-y-auto custom-scrollbar'>
-                        <p className='mb-2'>Recent activitites</p>
-                        <div className="w-full border-b border-gray-700 bg-transparent p-2 flex items-center justify-start gap-2">
-                            <svg className="p-1 bg-[#51515148] rounded-full w-6 h-6 animate-pulse text-gray-800 dark:text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M11.209 3.816a1 1 0 0 0-1.966.368l.325 1.74a5.338 5.338 0 0 0-2.8 5.762l.276 1.473.055.296c.258 1.374-.228 2.262-.63 2.998-.285.52-.527.964-.437 1.449.11.586.22 1.173.75 1.074l12.7-2.377c.528-.1.418-.685.308-1.27-.103-.564-.636-1.123-1.195-1.711-.606-.636-1.243-1.306-1.404-2.051-.233-1.085-.275-1.387-.303-1.587-.009-.063-.016-.117-.028-.182a5.338 5.338 0 0 0-5.353-4.39l-.298-1.592Z" />
-                                <path fillRule="evenodd" d="M6.539 4.278a1 1 0 0 1 .07 1.412c-1.115 1.23-1.705 2.605-1.83 4.26a1 1 0 0 1-1.995-.15c.16-2.099.929-3.893 2.342-5.453a1 1 0 0 1 1.413-.069Z" clipRule="evenodd" />
-                                <path d="M8.95 19.7c.7.8 1.7 1.3 2.8 1.3 1.6 0 2.9-1.1 3.3-2.5l-6.1 1.2Z" />
-                            </svg>
-
-                            <p className="font-normal">Arjun Kumar registered</p>
-                            <p className="border-0 px-2 py-1 rounded-md text-xs bg-gray-500/30 ml-auto whitespace-nowrap">2 mins ago</p>
-                        </div>
-                    </div> */}
-                    <div className='border-0 shadow-2xl cursor-default md:col-start-4 md:col-end-6 lg:col-start-4 lg:col-end-6 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] flex flex-col items-start justify-start rounded-md p-2 h-75 overflow-y-auto custom-scrollbar'>
                         <p className='mb-2'>Recent Activities</p>
                         {!loading && analytics?.recentUsers?.length > 0 ? (
                             analytics.recentUsers.map((u) => (
@@ -229,6 +219,101 @@ const Page = () => {
                         ) : (
                             !loading && <p className="text-gray-500 text-xs">No recent activity.</p>
                         )}
+                    </div> */}
+                </div>
+
+                {/* all orders table */}
+                <div className="rounded-md overflow-hidden bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2]">
+                    <div className="overflow-x-auto max-h-[65vh] overflow-y-auto custom-scrollbar">
+                        <table className="w-full text-sm text-center whitespace-nowrap min-w-175">
+                            <thead className="sticky top-0 z-10 bg-[#0f1720f7] border-b border-gray-700 uppercase text-gray-500">
+                                <tr>
+                                    <th className="py-3 px-4">#</th>
+                                    <th className="py-3 px-4 text-left">Order ID</th>
+                                    <th className="py-3 px-4">Symbol</th>
+                                    <th className="py-3 px-4">Market</th>
+                                    <th className="py-3 px-4">Type</th>
+                                    <th className="py-3 px-4">Qty</th>
+                                    <th className="py-3 px-4">Price</th>
+                                    <th className="py-3 px-4">Total</th>
+                                    <th className="py-3 px-4">Status</th>
+                                    <th className="py-3 px-4">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-800">
+                                {orders.length === 0 ? (
+                                    <tr><td colSpan="10" className="py-6 text-gray-500">No orders found.</td></tr>
+                                ) : orders.map((order, index) => (
+                                    <tr key={order._id} className="hover:bg-[#51515148] transition-all duration-150">
+                                        <td className="py-2 px-4 text-gray-500">{index + 1}</td>
+                                        <td className="py-2 px-4 text-left text-gray-400 text-xs font-mono">{order.orderId}</td>
+                                        <td className="py-2 px-4 font-semibold">{order.symbol}</td>
+                                        <td className="py-2 px-4 capitalize text-gray-400">{order.market}</td>
+                                        <td className="py-2 px-4">
+                                            <span className={`px-1 rounded-md border ${order.type === 'buy' ? 'border-green-500 bg-green-500/20 text-green-500' : 'border-red-500 bg-red-500/20 text-red-500'}`}
+                                            >
+                                                {order.type}
+                                            </span>
+                                        </td>
+                                        <td className="py-2 px-4">{order.quantity}</td>
+                                        <td className="py-2 px-4 font-mono">${order.priceAtOrder}</td>
+                                        <td className="py-2 px-4 font-mono">${order.totalValue}</td>
+                                        <td className="py-2 px-4">
+                                            <span className={`px-1 rounded-md border ${order.status === 'open' ? 'border-green-500 bg-green-500/20 text-green-500' : 'border-red-500 bg-red-500/20 text-red-500'}`}
+                                            >
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-2 px-4 text-gray-500 text-xs">
+                                            {new Date(order.createdAt).toLocaleDateString()}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* all alerts table */}
+                <div className="rounded-md overflow-hidden bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2]">
+                    <div className="overflow-x-auto max-h-[65vh] overflow-y-auto custom-scrollbar">
+                        <table className="w-full text-sm text-center whitespace-nowrap min-w-125">
+                            <thead className="sticky top-0 z-10 bg-[#0f1720f7] border-b border-gray-700 uppercase text-gray-500">
+                                <tr>
+                                    <th className="py-3 px-4">#</th>
+                                    <th className="py-3 px-4">Alert Id</th>
+                                    <th className="py-3 px-4 text-left">Symbol</th>
+                                    <th className="py-3 px-4">Target Price</th>
+                                    <th className="py-3 px-4">Type</th>
+                                    <th className="py-3 px-4">Status</th>
+                                    <th className="py-3 px-4">Created</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-800">
+                                {alerts.length === 0 ? (
+                                    <tr><td colSpan="6" className="py-6 text-gray-500">No alerts found.</td></tr>
+                                ) : alerts.map((alert, index) => (
+                                    <tr key={alert._id} className="hover:bg-[#51515148] transition-all duration-150">
+                                        <td className="py-2 px-4 text-gray-500">{index + 1}</td>
+                                        <td className="py-2 px-4 text-gray-500">{alert.alertId ? alert.alertId : '--'}</td>
+                                        <td className="py-2 px-4 text-left font-semibold">{alert.symbol}</td>
+                                        <td className="py-2 px-4 font-mono">${alert.targetPrice}</td>
+                                        <td className="py-2 px-4 text-gray-400 capitalize">{alert.type}</td>
+                                        <td className="py-2 px-4">
+                                            <span className={`px-2 py-0.5 rounded-md text-xs ${alert.triggered
+                                                ? 'bg-green-900 text-green-400'
+                                                : 'border-amber-400 bg-amber-600/30 text-amber-400'
+                                                }`}>
+                                                {alert.triggered ? 'Triggered' : 'Active'}
+                                            </span>
+                                        </td>
+                                        <td className="py-2 px-4 text-gray-500 text-xs">
+                                            {new Date(alert.createdAt).toLocaleDateString()}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 

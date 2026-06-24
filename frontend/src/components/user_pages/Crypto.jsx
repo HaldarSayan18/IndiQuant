@@ -3,41 +3,20 @@ import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import CandleStick from "../layouts/charts/CryptoCandleStick";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function CryptoComponent() {
-    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
     const [cryptos, setCryptos] = useState([]);
     const [cryptoOhlc, setCryptoOhlc] = useState([]);
     const [selectedCoinId, setSelectedCoinId] = useState('bitcoin');
     const [searchQuery, setSearchQuery] = useState('');
 
-    const cardsData = [
-        {
-            title: "Total market cap",
-            value: '$2.41T',
-            status: "+2.8% today"
-        },
-        {
-            title: "24h volume",
-            value: '$98.4B',
-            status: "+11% vs yesterday"
-        },
-        {
-            title: "BTC dominance",
-            value: '52.4%',
-            status: "of total market cap"
-        },
-        {
-            title: "Active coins",
-            value: '13,210',
-            status: ""
-        },
-    ];
-
     // fetch crypto from api
     const fetchCryptoData = useCallback(async () => {
         try {
-            // setLoading(true);
+            setLoading(true);
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/crypto`);
             const result = response.data;
             setCryptos(result.data);
@@ -53,14 +32,43 @@ export default function CryptoComponent() {
         })()
     }, [fetchCryptoData]);
 
+    const cardsData = [
+        {
+            title: "Total market cap",
+            value: `$${cryptos.reduce((total, crypto) => total + (crypto.market_cap || 0), 0).toFixed(2)}T`
+        },
+        {
+            title: "Total Price",
+            value: `$${cryptos.reduce((total, crypto) => total + (crypto.current_price || 0), 0).toFixed(2)}`
+        },
+        {
+            title: "BTC dominance",
+            value: '52.4%'
+        },
+        {
+            title: "Active coins",
+            value: cryptos.length
+        },
+    ];
+
+    // handle order
+    const handleOrder = (coin) => {
+        // console.log(coin.id);
+        const params = new URLSearchParams({
+            market: 'crypto',
+            name: coin.symbol,
+        });
+        router.push(`/dashboard/orders?${params.toString()}`);
+    };
+
     // fetch crypto ohlc data
     const showCryptoDetails = async (coin_id) => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/crypto/${coin_id}/history`);
             const result = response.data;
-            console.log('coin details---', result.data);
+            // console.log('coin details---', result.data);
             setSelectedCoinId(coin_id);
-            setCryptoOhlc(result.data);
+            // setCryptoOhlc(result.data);
             console.log('coin details selected---', selectedCoinId);
         } catch (error) {
             console.log('Error while fetching crypto ohlc data', error);
@@ -91,11 +99,11 @@ export default function CryptoComponent() {
                 </p>
                 <div className="flex items-center justify-center gap-2 ml-auto">
                     <input type="search" placeholder="search coin..." className="hidden md:flex lg:flex border border-gray-500 p-2 rounded-md outline-none bg-[#51515148] focus-within:ring-1 focus-within:ring-gray-500 focus-within:border-gray-500" onChange={handleSearch} />
-                    <button className="border flex px-3 py-2 rounded-md transition-all duration-100 group hover:text-[#cca649]">
+                    <button onClick={fetchCryptoData} className={`border flex px-3 py-2 rounded-md transition-all duration-100 group hover:text-[#cca649] ${loading ? 'cursor-not-allowed' : 'cursor-default'}`}>
                         <svg className="w-6 h-6 group-hover:text-[#cca649] dark:text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4" />
                         </svg>
-                        Refresh
+                        {loading ? 'Refreshing..' : 'Refresh'}
                     </button>
                 </div>
             </div>
@@ -105,7 +113,6 @@ export default function CryptoComponent() {
                     <div key={index} className="w-full md:w-[80%] lg:w-[90%] border-0 rounded-md px-1 py-4 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] flex flex-col items-center justify-center gap-1 transition-all duration-300 hover:scale-[1.05] cursor-default text-sm">
                         <p className="whitespace-nowrap">{item.title}</p>
                         <p className="whitespace-nowrap">{item.value}</p>
-                        <p className={`whitespace-nowrap ${item.status.startsWith('+') ? 'text-green-500' : item.status.startsWith('-') ? 'text-red-500' : 'text-gray-500'}`}>{item.status}</p>
                     </div>
                 ))}
             </div>
@@ -152,12 +159,12 @@ export default function CryptoComponent() {
                                             <td className="py-2 px-2">${coin.market_cap}</td>
                                             <td className="py-2 px-2 flex items-center justify-center gap-2">
                                                 <button type="button" className="border px-2 rounded-md shadow-2xl text-gray-400 hover:text-[#cca649] hover:cursor-pointer"
-                                                    onClick={() => {showCryptoDetails(coin.coin_id)}}
+                                                    onClick={() => { showCryptoDetails(coin.coin_id) }}
                                                 >
                                                     Details
                                                 </button>
                                                 <button type="button" className="border px-2 rounded-md shadow-2xl text-gray-400 hover:text-[#cca649] hover:cursor-pointer"
-                                                // onClick={() => showCryptoDetails(coin.symbol)}
+                                                    onClick={() => handleOrder(coin)}
                                                 >
                                                     Order
                                                 </button>
@@ -178,31 +185,6 @@ export default function CryptoComponent() {
 
                 {/* coin-details */}
                 <div className="border-0 border-gray-700 rounded-md w-full grid grid-cols-1 place-items-center bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2]">
-                    {/* {stockDetails && (
-                        <>
-                            <div className="p-4 cursor-default flex flex-col gap-0.5 border-0">
-                                <div className="w-full border-0 flex items-center justify-between text-lg font-bold">
-                                    <p>{stockDetails.symbol} {stockDetails.bid}</p>
-                                    <p className="ml-auto">{stockDetails.longName}</p>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <p className='border border-gray-500 px-2 py-0 rounded-md shadow-2xl'>{stockDetails.region}</p>
-                                    <p className='border border-gray-500 px-2 py-0 rounded-md shadow-2xl'>{stockDetails.financialCurrency}</p>
-                                    <p className='border border-gray-500 px-2 py-0 rounded-md shadow-2xl'>Bid: {stockDetails.bid}</p>
-                                    <p className={`border border-gray-500 px-2 py-0 rounded-md shadow-2xl ${stockDetails.tradable ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}>
-                                        {stockDetails.tradable ? "Tradable" : "Non-tradable"}
-                                    </p>
-                                </div>
-                                <p>Source: {stockDetails.quoteSourceName}</p>
-                                <p>Regular Market Day:
-                                    <span>{stockDetails.regularMarketDayRange[0]}</span> - <span>{stockDetails.regularMarketDayRange[1]}</span>
-                                </p>
-                                <p>Volume: {stockDetails.volume?.toFixed(1)}M</p>
-                                <p>Mkt Cap: ${stockDetails.marketCap}</p>
-                            </div>
-
-                            </>
-                            )} */}
                     {cryptoOhlc && (
                         <div className="border-0 px-4 py-2 w-full">
                             <CandleStick data={cryptoOhlc} coin_id={selectedCoinId} />

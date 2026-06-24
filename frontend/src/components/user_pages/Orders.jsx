@@ -1,38 +1,20 @@
 'use client';
 import { api } from "@/lib/api";
 import axios from "axios";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 export default function OrdersComponent() {
+    const searchParams = useSearchParams();
     const today = new Date().toDateString();
     const [orderType, setOrderType] = useState('buy');
     const [quantity, setQuantity] = useState("");
     const [symbol, setSymbol] = useState("");
     const [entryPrice, setEntryPrice] = useState("");
-    const [market, setMarket] = useState("stock");
     const [orders, setOrders] = useState([]);
-    const [form, setForm] = useState({ symbol: '', market: 'stock', type: 'buy', quantity: '', priceAtOrder: '' })
+    const [form, setForm] = useState({ symbol: '', market: 'stock', type: 'buy', })
     const [closeForm, setCloseForm] = useState({ orderId: '', closedPrice: '' });
     const [loading, setLoading] = useState(false);
-
-    const cardsData = [
-        {
-            title: "Total orders",
-            value: 14
-        },
-        {
-            title: "Open",
-            value: 5
-        },
-        {
-            title: "Closed",
-            value: 9
-        },
-        {
-            title: "Total invested",
-            value: '$48,210'
-        },
-    ];
 
     // place-order form handler
     const handlePlaceOrder = async (e) => {
@@ -40,8 +22,8 @@ export default function OrdersComponent() {
         try {
             setLoading(true);
             const orderForm = {
-                symbol,
-                market,
+                symbol: form.name,
+                market: form.market,
                 type: orderType,
                 quantity: Number(quantity),
                 priceAtOrder: Number(entryPrice),
@@ -64,19 +46,53 @@ export default function OrdersComponent() {
 
     // fetch order
     const fetchOrder = useCallback(async () => {
+        setLoading(true);
         try {
             const resp = await api.get('/api/orders');
             // console.log('orders---', resp.data.orders);
             setOrders(resp.data.orders);
         } catch (error) {
             console.error('Order fetching error', error);
+        } finally {
+            setLoading(false);
         }
     }, []);
     useEffect(() => {
         (async () => {
             await fetchOrder();
+
+            // autofill order form
+            const market = searchParams.get('market');
+            const name = searchParams.get('name');
+
+            if (market && name) {
+                setForm(prev => ({
+                    ...prev,
+                    market,
+                    name: name || '',
+                }));
+            }
         })();
-    }, [fetchOrder]);
+    }, [fetchOrder, searchParams]);
+
+    const cardsData = [
+        {
+            title: "Total orders",
+            value: orders.length
+        },
+        {
+            title: "Open",
+            value: orders.filter(o => o.status === 'open').length
+        },
+        {
+            title: "Closed",
+            value: orders.filter(o => o.status === 'closed').length
+        },
+        {
+            title: "Total invested",
+            value: `$${orders.reduce((total, order) => total + (order.priceAtOrder || 0), 0).toFixed(2)}`
+        },
+    ];
 
     // close an open order
     const handleCloseOrder = async (order_id) => {
@@ -167,8 +183,9 @@ export default function OrdersComponent() {
                         {/* alert-type */}
                         <div className="w-full flex flex-col">
                             <label>Quantity</label>
-                            <input type="number" placeholder="0.00"
-                                value={quantity} name="quantity" onChange={(e) => setQuantity(e.target.value)}
+                            <input type="number" placeholder="0.00" required
+                                value={quantity} name="quantity"
+                                onChange={(e) => setQuantity(e.target.value)}
                                 className="border border-gray-700 focus-within:ring-1 focus-within:ring-gray-500 focus-within:border-gray-500 outline-none px-2 rounded-md py-1"
                             />
                         </div>
@@ -176,8 +193,9 @@ export default function OrdersComponent() {
                         {/* symbol */}
                         <div className="w-full flex flex-col">
                             <label>Symbol</label>
-                            <input type="text" placeholder="e.g. AAPL, BITCOIN"
-                                value={symbol} name="symbol" onChange={(e) => setSymbol(e.target.value)}
+                            <input type="text" placeholder="e.g. AAPL, BITCOIN" required
+                                value={form.name || ""} name="name"
+                                onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
                                 className="uppercase border border-gray-700 focus-within:ring-1 focus-within:ring-gray-500 focus-within:border-gray-500 outline-none px-2 rounded-md py-1"
                             />
                         </div>
@@ -185,7 +203,7 @@ export default function OrdersComponent() {
                         {/* target-price */}
                         <div className="w-full flex flex-col">
                             <label>Entry Price</label>
-                            <input type="number" placeholder="0.00"
+                            <input type="number" step="any" placeholder="0.00" required
                                 value={entryPrice} name="entryPrice" onChange={(e) => setEntryPrice(e.target.value)}
                                 className="border border-gray-700 focus-within:ring-1 focus-within:ring-gray-500 focus-within:border-gray-500 outline-none px-2 rounded-md py-1"
                             />
@@ -194,8 +212,8 @@ export default function OrdersComponent() {
                         {/* market */}
                         <div className="w-full flex flex-col">
                             <label>Market</label>
-                            <select tabIndex={0}
-                                value={market} name="market" onChange={(e) => setMarket(e.target.value)}
+                            <select tabIndex={0} required
+                                value={form.market} name="market" onChange={(e) => setForm(prev => ({ ...prev, market: e.target.value }))}
                                 className="border border-gray-700 focus-within:ring-1 focus-within:ring-gray-500 focus-within:border-gray-500 outline-none px-2 rounded-md py-1"
                             >
                                 <option value="stock">Stock</option>
@@ -252,20 +270,26 @@ export default function OrdersComponent() {
 
                                                 <p className="text-lg font-medium">{order.symbol}</p>
                                                 <div className="flex items-center justify-center gap-1 ml-auto text-sm">
-                                                    <p className="border px-1 rounded-md flex items-center justify-center text-sm capitalize">{order.market}</p>
+                                                    <p className="border px-1 rounded-md flex items-center justify-center text-sm uppercase">{order.market}</p>
                                                     <p className={`px-1 rounded-md border ${order.status === 'open' ? 'border-green-500 bg-green-500/20 text-green-500' : 'border-red-500 bg-red-500/20 text-red-500'}`}>{order.status}</p>
                                                 </div>
                                             </div>
                                             <input
-                                                type="number" step="any" placeholder="Exit price"
+                                                type="number" placeholder="Exit price" required
                                                 value={closeForm.orderId === order._id ? closeForm.closedPrice : ''}
                                                 onChange={e => setCloseForm({ orderId: order._id, closedPrice: e.target.value })}
                                                 className="border border-gray-500 p-1 rounded-md outline-none"
                                             />
+                                            <p className="-mt-1 text-sm text-gray-400 flex items-center gap-1">
+                                                <svg className="border-0 w-6 h-6 rounded-full p-1 bg-[#51515148] text-gray-800 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path fillRule="evenodd" d="M3.559 4.544c.355-.35.834-.544 1.33-.544H19.11c.496 0 .975.194 1.33.544.356.35.559.829.559 1.331v9.25c0 .502-.203.981-.559 1.331-.355.35-.834.544-1.33.544H15.5l-2.7 3.6a1 1 0 0 1-1.6 0L8.5 17H4.889c-.496 0-.975-.194-1.33-.544A1.868 1.868 0 0 1 3 15.125v-9.25c0-.502.203-.981.559-1.331ZM7.556 7.5a1 1 0 1 0 0 2h8a1 1 0 0 0 0-2h-8Zm0 3.5a1 1 0 1 0 0 2H12a1 1 0 1 0 0-2H7.556Z" clipRule="evenodd" />
+                                                </svg>
+                                                Closed info. will be sent to your registered email.
+                                            </p>
                                             <button type="submit" form="close-order"
                                                 disabled={loading || !closeForm.orderId}
                                                 onClick={(e) => handleCloseOrder(order.orderId)}
-                                                className="w-full border-0 rounded-md px-2 py-1 border-red-400 bg-red-600/30 text-red-400 ml-auto hover:cursor-pointer"
+                                                className="w-full border-0 rounded-md px-2 py-1 border-red-400 bg-red-600/30 text-red-400 ml-auto hover:cursor-pointer hover:text-red-300 hover:bg-red-500/50"
                                             >
                                                 {loading && closeForm.orderId === order.orderId ? 'Closing order..' : 'Close order'}
                                             </button>
@@ -344,7 +368,7 @@ export default function OrdersComponent() {
                                                 <span className={`px-2 rounded-md border ${order.status === 'open' ? 'border-green-500 bg-green-500/20 text-green-500' : 'border-red-500 bg-red-500/20 text-red-500'}`}>{order.status}</span>
                                             </td>
                                             <td>
-                                                <button type="button" onClick={()=>handleOrderDelete(order.orderId)} className="p-1 hover:bg-red-500/20 rounded-full transition-colors cursor-pointer flex items-center justify-center">
+                                                <button type="button" onClick={() => handleOrderDelete(order.orderId)} className="p-1 hover:bg-red-500/20 rounded-full transition-colors cursor-pointer flex items-center justify-center">
                                                     <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>

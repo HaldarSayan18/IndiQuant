@@ -13,7 +13,7 @@ export default function CandleStick({ data, coin_id }) {
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_API}/api/crypto/${coin_id}/history?range=${range}`);
                 const history = response.data;
-                console.log('history data candlestick', history.data[range]);
+                // console.log('history data candlestick', history.data[range]);
                 const candles = history.data[range].map(candle => ({
                     x: new Date(candle.timestamp),
                     y: [
