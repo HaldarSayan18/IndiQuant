@@ -18,26 +18,35 @@ export default function Page({ children }) {
     const [isLoading, setLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState('');
-    const [messages, setMessages] = useState([
-        { role: 'assistant', content: 'Hi, Ask me anything regarding market!' }
-    ]);
-    const bottomRef = useRef(null);
+    // const [messages, setMessages] = useState([
+    //     { role: 'assistant', content: 'Hi, Ask me anything regarding market!' }
+    // ]);
+    // const bottomRef = useRef(null);
 
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behaviour: 'smooth' })
-    }, [messages]);
+    // useEffect(() => {
+    //     bottomRef.current?.scrollIntoView({ behaviour: 'smooth' })
+    // }, [messages]);
 
-    // send message to bot
-    async function sendMsg() {
-        if (!input.trim() || isLoading) return;
-        const userMsg = { role: user, content: input };
-        const next = [...messages, userMsg];
-        setMessages(next);
-        setInput('');
-        setLoading(true);
+    // // send message to bot
+    // async function sendMsg() {
+    //     if (!input.trim() || isLoading) return;
+    //     const userMsg = { role: user, content: input };
+    //     const next = [...messages, userMsg];
+    //     setMessages(next);
+    //     setInput('');
+    //     setLoading(true);
 
-        const res = await axios.get(``)
-    }
+    //     const res = await axios.get(``)
+    // }
+
+    const handleAdmin = () => {
+        if (user?.role === 'admin') {
+            router.push('/admin');
+        } else {
+            alert('You are not admin!');
+            router.push('/dashboard');
+        }
+    };
 
     // sidebar items
     const sidebar_items = [
@@ -156,7 +165,7 @@ export default function Page({ children }) {
                         {isLoggedIn ? (
                             <>
                                 {/* admin */}
-                                <button onClick={() => router.push('/admin')}
+                                <button onClick={handleAdmin}
                                     className="border-0 border[#1f2937] bg-[#111827cc] rounded w-full flex items-center justify-start gap-2 p-1 px-2 pl-0 md:pl-[25%] lg:pl-[25%] shadow-xl hover:bg-[#172033] hover:text-[#facc15] cursor-default"
                                 >
                                     <svg className="w-6 h-6 text-gray-800 dark:text-[#cca629]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -175,7 +184,7 @@ export default function Page({ children }) {
                                 </button>
                             </>
                         ) : (
-                            <button onClick={() => router.push('/')}
+                            <button onClick={() => router.push('/login')}
                                 className="border-0 border[#1f2937] bg-[#111827cc] rounded w-full flex items-center justify-start gap-2 p-1 pl-0 md:pl-[25%] lg:pl-[25%] shadow-xl hover:bg-[#172033] hover:text-[#facc15] cursor-default"
                             >
                                 <svg className="w-6 h-6 text-gray-800 dark:text-[#cca629]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -191,7 +200,7 @@ export default function Page({ children }) {
                 <div className="relative flex flex-col h-full overflow-y-auto custom-root-scrollbar col-start-2 col-end-6 border-0 rounded-xl m-0 px-2 text-gray-300">
                     {/* navbar */}
                     <div className="border flex items-center justify-between px-2 py-2 border-[#2a2a2a] rounded-xl bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2]">
-                        <p className="uppercase text-[#cca629] hover:cursor-pointer">{filteredPathName}</p>
+                        <p className="uppercase text-[#cca629] hover:cursor-pointer">{filteredPathName === 'dashboard' ? 'home' : filteredPathName}</p>
                         <div className="flex items-center justify-center gap-2 ml-auto">
                             {isLoggedIn ? (
                                 <div className="flex items-center justify-center gap-1 border-0 border-gray-600 rounded-md bg-transparent">
@@ -201,7 +210,7 @@ export default function Page({ children }) {
                                     <p className="hidden md:flex lg:flex items-center justify-center">{user.fullname}</p>
                                 </div>
                             ) : (
-                                <button className="border border-gray-600 rounded-md bg-[#51515148] px-3 py-1 transition-all duration-500 ease-in-out animate-pulse hover:animate-none hover:-translate-y-1" onClick={() => { router.push('/login'); }}>Your Demat Account</button>
+                                <button className="border border-gray-600 rounded-md bg-[#51515148] px-3 py-1 transition-all duration-500 ease-in-out animate-pulse hover:animate-none hover:-translate-y-1 whitespace-nowrap" onClick={() => { router.push('/login'); }}>Your Demat Account</button>
                             )}
                         </div>
                     </div>
@@ -213,7 +222,7 @@ export default function Page({ children }) {
 
                     {/* chat-bot */}
                     {/* <div className="fixed w-full top-6/12 md:8/12 lg:top-7/12 ml-auto flex items-center justify-end border-0 pr-8"> */}
-                    <div className="absolute bottom-2 right-5 z-50 border-0">
+                    <div className={`absolute bottom-2 right-0 md:right-5 lg:right-5 z-50 border-0 ${filteredPathName === 'alerts' || filteredPathName === 'orders' ? 'hidden':'flex'}`}>
                         <Image src={chatbot.src} alt="chatbot" height={40} width={40}
                             onClick={() => setIsOpen(!isOpen)}
                             className="p-1 bg-[#515148] rounded-full border-2 border-gray-800/70 h-auto w-auto transition ease-in-out hover:scale-110"

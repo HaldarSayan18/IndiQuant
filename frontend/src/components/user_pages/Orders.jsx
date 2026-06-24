@@ -11,6 +11,8 @@ export default function OrdersComponent() {
     const [entryPrice, setEntryPrice] = useState("");
     const [market, setMarket] = useState("stock");
     const [orders, setOrders] = useState([]);
+    const [form, setForm] = useState({ symbol: '', market: 'stock', type: 'buy', quantity: '', priceAtOrder: '' })
+    const [closeForm, setCloseForm] = useState({ orderId: '', closedPrice: '' });
     const [loading, setLoading] = useState(false);
 
     const cardsData = [
@@ -64,7 +66,7 @@ export default function OrdersComponent() {
     const fetchOrder = useCallback(async () => {
         try {
             const resp = await api.get('/api/orders');
-            console.log(resp.data.orders);
+            // console.log('orders---', resp.data.orders);
             setOrders(resp.data.orders);
         } catch (error) {
             console.error('Order fetching error', error);
@@ -74,7 +76,51 @@ export default function OrdersComponent() {
         (async () => {
             await fetchOrder();
         })();
-    }, [fetchOrder])
+    }, [fetchOrder]);
+
+    // close an open order
+    const handleCloseOrder = async (order_id) => {
+        const exitPrice = Number(closeForm.closedPrice);
+
+        if (!order_id || isNaN(exitPrice) || exitPrice <= 0) {
+            alert("Please enter a valid exit price.");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await api.patch(`/api/orders/${order_id}/close`, {
+                closedPrice: exitPrice,
+            });
+
+            console.log('Order closed successfully');
+            setCloseForm({ orderId: '', closedPrice: '' });
+
+            fetchOrder();
+        } catch (error) {
+            console.error('Close order error:', error.response?.data?.error || error.message);
+            alert(error.response?.data?.error || 'Failed to close order.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // delete an order
+    const handleOrderDelete = async (orderId) => {
+        setLoading(true);
+        try {
+            if (!confirm('Remove the order?')) return;
+            await api.delete(`/api/orders/${orderId}`);
+            console.log('Order removed');
+
+            fetchOrder();
+        } catch (error) {
+            console.error(error || 'Failed to delete an order');
+        } finally {
+            setLoading(false);
+        }
+    };
+    const openOrders = orders.filter(o => o.status === 'open');
 
     return (
         <div className="grid grid-cols-1 gap-5 border-0 p-0 text-gray-300">
@@ -187,26 +233,42 @@ export default function OrdersComponent() {
                                 <p>Loading...</p>
                             </div>
                         ) : (
-                            orders.length === 0 ? (
+                            openOrders.length === 0 ? (
                                 <div>
                                     <p>Place your order first</p>
                                 </div>
                             ) : (
-                                orders.map((order, index) => (
-                                    <div key={index} className="border border-gray-700 bg-[#51515125] rounded-md p-2 flex items-center justify-start gap-3 transition-all duration-300 ease-in-out hover:scale-[1.01]">
-                                        <svg className="border-0 p-1 w-9 h-9 rounded-full bg-[#cca649] text-gray-800 dark:text-[#4f3b09] animate-pulse" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                openOrders.map((order, index) => (
+                                    <div key={index} className="w-full border border-gray-700 bg-[#51515125] rounded-md p-2 flex flex-col md:flex-col lg:flex-row items-center justify-start gap-3">
+                                        <svg className="hidden md:flex lg:flex border-0 p-1 w-9 h-9 rounded-full bg-[#cca649] text-gray-800 dark:text-[#4f3b09] animate-pulse" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M17.133 12.632v-1.8a5.406 5.406 0 0 0-4.154-5.262.955.955 0 0 0 .021-.106V3.1a1 1 0 0 0-2 0v2.364a.955.955 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C6.867 15.018 5 15.614 5 16.807 5 17.4 5 18 5.538 18h12.924C19 18 19 17.4 19 16.807c0-1.193-1.867-1.789-1.867-4.175ZM6 6a1 1 0 0 1-.707-.293l-1-1a1 1 0 0 1 1.414-1.414l1 1A1 1 0 0 1 6 6Zm-2 4H3a1 1 0 0 1 0-2h1a1 1 0 1 1 0 2Zm14-4a1 1 0 0 1-.707-1.707l1-1a1 1 0 1 1 1.414 1.414l-1 1A1 1 0 0 1 18 6Zm3 4h-1a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2ZM8.823 19a3.453 3.453 0 0 0 6.354 0H8.823Z" />
                                         </svg>
-                                        <div className="flex flex-col gap-1">
-                                            <p className="text-lg font-medium">{order.symbol}</p>
-                                            <div className="flex items-center justify-center gap-1">
-                                                <p className="border px-1 rounded-2xl flex items-center justify-center text-sm capitalize">{order.market}</p>
-                                                <p className="border px-1 rounded-2xl flex items-center justify-center text-sm capitalize">{order.status}</p>
+
+                                        <div className="w-full flex flex-col gap-2 border-0">
+                                            <div className="w-full flex flex-row items-center justify-start md:justify-between lg:justify-between gap-2">
+                                                <svg className="flex md:hidden lg:hidden border-0 p-1 w-9 h-9 rounded-full bg-[#cca649] text-gray-800 dark:text-[#4f3b09] animate-pulse" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M17.133 12.632v-1.8a5.406 5.406 0 0 0-4.154-5.262.955.955 0 0 0 .021-.106V3.1a1 1 0 0 0-2 0v2.364a.955.955 0 0 0 .021.106 5.406 5.406 0 0 0-4.154 5.262v1.8C6.867 15.018 5 15.614 5 16.807 5 17.4 5 18 5.538 18h12.924C19 18 19 17.4 19 16.807c0-1.193-1.867-1.789-1.867-4.175ZM6 6a1 1 0 0 1-.707-.293l-1-1a1 1 0 0 1 1.414-1.414l1 1A1 1 0 0 1 6 6Zm-2 4H3a1 1 0 0 1 0-2h1a1 1 0 1 1 0 2Zm14-4a1 1 0 0 1-.707-1.707l1-1a1 1 0 1 1 1.414 1.414l-1 1A1 1 0 0 1 18 6Zm3 4h-1a1 1 0 1 1 0-2h1a1 1 0 1 1 0 2ZM8.823 19a3.453 3.453 0 0 0 6.354 0H8.823Z" />
+                                                </svg>
+
+                                                <p className="text-lg font-medium">{order.symbol}</p>
+                                                <div className="flex items-center justify-center gap-1 ml-auto text-sm">
+                                                    <p className="border px-1 rounded-md flex items-center justify-center text-sm capitalize">{order.market}</p>
+                                                    <p className={`px-1 rounded-md border ${order.status === 'open' ? 'border-green-500 bg-green-500/20 text-green-500' : 'border-red-500 bg-red-500/20 text-red-500'}`}>{order.status}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex flex-col ml-auto gap-1">
-                                            <p>{order.type}</p>
-                                            <p className="border-0 px-2 py-1 rounded-2xl text-xs bg-green-300/30 text-green-500">Target-price</p>
+                                            <input
+                                                type="number" step="any" placeholder="Exit price"
+                                                value={closeForm.orderId === order._id ? closeForm.closedPrice : ''}
+                                                onChange={e => setCloseForm({ orderId: order._id, closedPrice: e.target.value })}
+                                                className="border border-gray-500 p-1 rounded-md outline-none"
+                                            />
+                                            <button type="submit" form="close-order"
+                                                disabled={loading || !closeForm.orderId}
+                                                onClick={(e) => handleCloseOrder(order.orderId)}
+                                                className="w-full border-0 rounded-md px-2 py-1 border-red-400 bg-red-600/30 text-red-400 ml-auto hover:cursor-pointer"
+                                            >
+                                                {loading && closeForm.orderId === order.orderId ? 'Closing order..' : 'Close order'}
+                                            </button>
                                         </div>
                                     </div>
                                 ))
@@ -249,6 +311,7 @@ export default function OrdersComponent() {
                                 <th className="py-3 px-4">Exit</th>
                                 <th className="py-3 px-4">P&L</th>
                                 <th className="py-3 px-4">Status</th>
+                                <th className="py-3 px-4"></th>
                             </tr>
                         </thead>
 
@@ -273,12 +336,19 @@ export default function OrdersComponent() {
                                             <td className="py-2 px-2 capitalize">{order.market}</td>
                                             <td className="py-2 px-2 font-mono">{order.quantity}</td>
                                             <td className="py-2 px-2 font-mono">${order.priceAtOrder}</td>
-                                            <td className="py-2 px-2">--</td>
+                                            <td className="py-2 px-2 font-mono">${order.closedPrice}</td>
                                             <td className="py-2 px-2">
                                                 <p className={`border-0 ${order.totalValue > 0 ? 'text-green-500' : 'text-red-500'}`}>${order.totalValue}</p>
                                             </td>
                                             <td className="py-2 px-2 text-center">
                                                 <span className={`px-2 rounded-md border ${order.status === 'open' ? 'border-green-500 bg-green-500/20 text-green-500' : 'border-red-500 bg-red-500/20 text-red-500'}`}>{order.status}</span>
+                                            </td>
+                                            <td>
+                                                <button type="button" onClick={()=>handleOrderDelete(order.orderId)} className="p-1 hover:bg-red-500/20 rounded-full transition-colors cursor-pointer flex items-center justify-center">
+                                                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
                                             </td>
                                         </tr>
                                     ))

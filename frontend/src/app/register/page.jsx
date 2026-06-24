@@ -24,7 +24,7 @@ export default function Register() {
                 return;
             }
             const { data } = await api.post('/api/auth/register', form);
-            console.log('register data ->', data);
+            // console.log('register data ->', data);
             saveToken(data.token);
 
             router.push('/dashboard');

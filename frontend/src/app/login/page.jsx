@@ -35,7 +35,7 @@ export default function Home() {
       <div className="border-0 border-gray-950/20 w-[90%] md:w-[40%] lg:w-[30%] bg-linear-to-tl from-[#000000c5] via-[#131313c5] to-[#13131354] rounded-lg shadow-xs flex flex-col items-center justify-center gap-3 px-5 py-5 md:py-8 lg:py-10 text-gray-300">
         <Image src={logo.src} alt="logo" height={90} width={90} loading='eager' className="w-auto h-auto" />
         <h1>Welcome back!</h1>
-        <form className="flex flex-col items-center justify-center gap-2 border-0" onSubmit={handleLogin}>
+        <form id="login-form" className="flex flex-col items-center justify-center gap-2 border-0" onSubmit={handleLogin}>
           {/* error */}
           {error && (
             <div className="w-full border text-red-500 flex items-center justify-center">{error}</div>
@@ -89,7 +89,7 @@ export default function Home() {
           </div>
 
           {/* login-btn */}
-          <button type="submit"
+          <button type="submit" form="login-form"
             className={`border-0 border-gray-800 w-full px-2 py-1.5 rounded-md mt-2 bg-linear-to-b from-[#cca629] to-[#a17214] font-medium text-black transition-all hover:scale-[1.03] hover:border-[#cca629] duration-300 ease-in ${loading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           >
             {loading ? 'Signing in...' : 'Sign in'}
