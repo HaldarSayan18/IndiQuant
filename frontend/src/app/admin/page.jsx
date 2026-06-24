@@ -3,57 +3,65 @@ import Footer from '@/components/layouts/Footer';
 import { api } from '@/lib/api';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 const Page = () => {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [users, setUsers] = useState([]);
+    const [analytics, setAnalytics] = useState(null);
+    const [search, setSearch] = useState('');
+    const [roleFilter, setRoleFilter] = useState('All roles');
 
-    const cardsData = [
-        {
-            title: "Total users",
-            value: 100,
-            stats: "+4 this week",
-        },
-        {
-            title: "Total orders",
-            value: 52,
-            stats: "+1 today",
-        },
-        {
-            title: "Active alerts",
-            value: 20,
-            stats: "all users",
-        },
-        {
-            title: "Admins",
-            value: 4,
-            stats: "of 100",
-        },
-        {
-            title: "New today",
-            value: 4,
-            stats: "registrations",
-        },
-    ];
-
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const result = await api.get(`/api/stock/AAPL`);
-                const data = await result.data;
-                console.log(data);
-            } catch (error) {
-                console.error('Error fetching data from Yahoo Finance:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+    const fetchAdminData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const [userResp, analyticsResp] = await Promise.all([
+                api.get(`/api/admin/users`),
+                api.get(`/api/admin/analytics`),
+            ]);
+            setUsers(userResp.data.users);
+            setAnalytics(analyticsResp.data.analytics);
+        } catch (error) {
+            console.error('Error fetching admin data', error);
+        } finally {
+            setLoading(false);
+        }
     }, []);
+    useEffect(() => {
+        // const fetchData = async () => {
+        //     setLoading(true);
+        //     try {
+        //         const result = await api.get(`/api/stock/AAPL`);
+        //         const data = await result.data;
+        //         console.log(data);
+        //     } catch (error) {
+        //         console.error('Error fetching data from Yahoo Finance:', error);
+        //     } finally {
+        //         setLoading(false);
+        //     }
+        // };
+
+        // fetchData();
+        (() => {
+            fetchAdminData();
+        })();
+    }, [fetchAdminData]);
+
+    const cardsData = useMemo(() => {
+        if (!analytics) return [];
+        const todaySignups = analytics.recentSignUps?.length
+            ? analytics.recentSignups[analytics.recentSignups.length - 1].count
+            : 0;
+        return [
+            { title: "Total users", value: analytics.totalUsers, stats: `${analytics.recentSignups?.reduce((s, d) => s + d.count, 0) || 0} this week` },
+            { title: "Total orders", value: analytics.totalOrders, stats: "+1 today" },
+            { title: "Active alerts", value: analytics.totalAlerts, stats: "all users" },
+            { title: "Admins", value: analytics.adminCount, stats: `of ${analytics.totalUsers}` },
+            { title: "New today", value: todaySignups, stats: "registrations" },
+        ];
+    }, [analytics]);
 
     const handleLogout = () => {
         alert('Logout');
@@ -96,7 +104,7 @@ const Page = () => {
                 </div>
 
                 {/* cards */}
-                <div className="border-0 grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 place-items-center gap-3 p-1 cursor-default">
+                <div className="border grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 place-items-center gap-3 p-1 cursor-default">
                     {cardsData.map((item, index) => (
                         <div key={index} className="w-full md:w-[80%] lg:w-[80%] border-0 rounded-md px-2 py-5 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] flex flex-col items-center justify-center transition-all duration-300 hover:scale-[1.05]">
                             <p className="whitespace-nowrap">{item.title}</p>

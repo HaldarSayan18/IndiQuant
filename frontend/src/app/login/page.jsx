@@ -32,7 +32,7 @@ export default function Home() {
 
   return (
     <div className="backdrop-blur-xs w-full flex items-center justify-center m-auto min-h-screen">
-      <div className="border-0 border-gray-950/20 w-[80%] md:w-[40%] lg:w-[30%] bg-linear-to-tl from-[#000000c5] via-[#131313c5] to-[#13131354] rounded-lg shadow-xs flex flex-col items-center justify-center gap-3 px-5 py-5 md:py-8 lg:py-10 text-gray-300">
+      <div className="border-0 border-gray-950/20 w-[90%] md:w-[40%] lg:w-[30%] bg-linear-to-tl from-[#000000c5] via-[#131313c5] to-[#13131354] rounded-lg shadow-xs flex flex-col items-center justify-center gap-3 px-5 py-5 md:py-8 lg:py-10 text-gray-300">
         <Image src={logo.src} alt="logo" height={90} width={90} loading='eager' className="w-auto h-auto" />
         <h1>Welcome back!</h1>
         <form className="flex flex-col items-center justify-center gap-2 border-0" onSubmit={handleLogin}>

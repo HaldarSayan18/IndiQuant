@@ -50,7 +50,7 @@ router.patch('/:order_id/close', auth, async (req, res) => {
         if (!closedPrice || closedPrice <= 0)
             return res.status(400).json({ success: false, error: 'Valid exit price required.' });
 
-        const order = await Orders.findOne({ _id: req.params.order_id, userId: req.user.id });
+        const order = await Orders.findOne({ id: req.params.orderId, userId: req.user.id });
         if (!order)
             return res.status(404).json({ success: false, error: "Order not found!" });
         if (order.status === 'closed')

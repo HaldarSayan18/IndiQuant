@@ -3,7 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenAI } from '@google/genai';
 import OpenAI from 'openai';
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const client = new OpenAI({ baseURL: 'https://openrouter.ai/api/v1', apiKey: process.env.OPENROUTER_AI_API_KEY });
 // const models = await client.models.list();
 // console.log('ai models', models);
 
@@ -17,11 +17,7 @@ export default async function getAgent_AISuggestions(candidates) {
         Respond with ONLY a JSON array, no other text.
     `;
         const response = await client.chat.completions.create({
-            model: 'gpt-3.5-turbo',
-            // contents: prompt,
-            // config: {
-            //     responseMimeType: 'application/json'
-            // }
+            model: 'openrouter/free',
             messages: [
                 { role: 'user', content: prompt }
             ],
@@ -29,23 +25,41 @@ export default async function getAgent_AISuggestions(candidates) {
             response_format: { type: 'json_object' }
         });
         const text = response.choices[0].message.content;
-        picks = JSON.parse(text);
+        const cleanText = text
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .trim();
+        const parsed = JSON.parse(cleanText);
+        // console.log('RAW parsed keys:', Object.keys(parsed));
+
+        if (Array.isArray(parsed)) {
+            picks = parsed;
+        } else if (Array.isArray(parsed.data)) {
+            picks = parsed.data;
+        } else if (Array.isArray(parsed.signals)) {
+            picks = parsed.signals;
+        } else if (parsed.symbol) {
+            picks = [parsed];
+        } else {
+            picks = [];
+        }
+        // console.log('Parsed picks:', picks);
+        // console.log(parsed);
     } catch (error) {
         // controll fallback
-        return candidates
-            .slice(0, 10)
-            .map(c => ({
-                ...c,
-                signal:
-                    (c.change24h || 0) > 5 ? "Strong buy"
-                        : (c.change24h || 0) > 1 ? "Buy"
-                            : (c.change24h || 0) > -2 ? "Watch"
-                                : "Avoid",
-                reason: "Fallback signal (AI unavailable)"
-            }));
-
+        // return candidates
+        //     .slice(0, 10)
+        //     .map(c => ({
+        //         ...c,
+        //         signal:
+        //             (c.change24h || 0) > 5 ? "Strong buy"
+        //                 : (c.change24h || 0) > 1 ? "Buy"
+        //                     : (c.change24h || 0) > -2 ? "Watch"
+        //                         : "Avoid",
+        //         reason: "Fallback signal (AI unavailable)"
+        //     }));
         console.error('OpenAI api failed', error);
-        throw new Error('Failed to parse OpenAI API');
+        return [];
     }
 
     // merge Agent's response with the live data

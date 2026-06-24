@@ -85,7 +85,7 @@ const AiPicks = () => {
                     <svg className="w-6 h-6 text-gray-800 dark:text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 18.5A2.493 2.493 0 0 1 7.51 20H7.5a2.468 2.468 0 0 1-2.4-3.154 2.98 2.98 0 0 1-.85-5.274 2.468 2.468 0 0 1 .92-3.182 2.477 2.477 0 0 1 1.876-3.344 2.5 2.5 0 0 1 3.41-1.856A2.5 2.5 0 0 1 12 5.5m0 13v-13m0 13a2.493 2.493 0 0 0 4.49 1.5h.01a2.468 2.468 0 0 0 2.403-3.154 2.98 2.98 0 0 0 .847-5.274 2.468 2.468 0 0 0-.921-3.182 2.477 2.477 0 0 0-1.875-3.344A2.5 2.5 0 0 0 14.5 3 2.5 2.5 0 0 0 12 5.5m-8 5a2.5 2.5 0 0 1 3.48-2.3m-.28 8.551a3 3 0 0 1-2.953-5.185M20 10.5a2.5 2.5 0 0 0-3.481-2.3m.28 8.551a3 3 0 0 0 2.954-5.185" />
                     </svg>
-                    AI Suggestions
+                    Suggestions
                 </p>
                 <div className="flex items-center justify-center gap-2 ml-auto">
                     {/* <input type="search" placeholder="search coin..." className="hidden md:flex lg:flex border border-gray-500 p-2 rounded-md outline-none bg-[#51515148] focus-within:ring-1 focus-within:ring-gray-500 focus-within:border-gray-500" onChange={handleSearch} /> */}
@@ -135,7 +135,7 @@ const AiPicks = () => {
                     <p className='col-span-full text-center'>No suggestions match this filter.</p>
                 ) : (
                     renewedSuggestions.map((item, index) => (
-                        <div key={index} className={`flex flex-col border-0 w-full h-42 md:h-45 lg:h-50 ${item.ai_suggest === 'Strong buy' ? 'bg-green-300/60' : item.ai_suggest === 'Watch' ? 'bg-amber-300/60' : item.ai_suggest === 'Avoid' ? 'bg-red-300/60' : 'bg-blue-300/60'} rounded-md rounded-b-lg`}>
+                        <div key={index} className={`flex flex-col border-0 w-full h-60 md:h-48 lg:h-52 ${item.ai_suggest === 'Strong buy' ? 'bg-green-300/60' : item.ai_suggest === 'Watch' ? 'bg-amber-300/60' : item.ai_suggest === 'Avoid' ? 'bg-red-300/60' : 'bg-blue-300/60'} rounded-md rounded-b-lg`}>
                             <div className={`w-full h-full border-0 flex flex-col items-stretch justify-start gap-2 rounded-md p-2 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] mt-1`}>
                                 <div className='flex items-center justify-between gap-2'>
                                     <div className='w-full flex flex-col gap-0 items-start justify-center'>
@@ -153,6 +153,7 @@ const AiPicks = () => {
                                     </div>
                                     <p>chart</p>
                                 </div>
+                                <div>{item.reason}</div>
                                 <div className='mt-auto py-1 flex items-center justify-end gap-2 white'>
                                     <button className="border border-gray-600 rounded-md bg-[#51515148] px-3 py-1 transition-all duration-300 ease-in-out hover:border-[#cca649] hover:text-[#cca649] hover:-translate-y-1">Set alert</button>
                                     <button className="border border-gray-600 rounded-md bg-[#51515148] px-3 py-1 transition-all duration-300 ease-in-out hover:border-[#cca649] hover:text-[#cca649] hover:-translate-y-1">Place order</button>

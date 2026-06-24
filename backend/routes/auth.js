@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 12);
 
         // save new user
-        const newUser = await User.create({ role, fullname, email, contact, password: hashedPassword });
+        const newUser = await User.create({ role : 'user', fullname, email, contact, password: hashedPassword });
 
         // sign jwt
         const token = jwt.sign(

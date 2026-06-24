@@ -5,19 +5,21 @@ import connectDB from './utils/db.js';
 import newsRoutes from './routes/news.js';
 import alertsRoutes from './routes/alerts.js';
 import aiSuggestRoutes from './routes/aiSuggest.js';
+import chatBotRoutes from './routes/chatBot.js';
 import ordersRoutes from './routes/order.js';
 import portfolioRoutes from './routes/portfolio.js';
 import nftRoutes from './routes/nft.js';
 import cryptoRoutes from './routes/crypto.js';
 import stockRoutes from './routes/stock.js';
 import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 
 // cors permission
 app.use(cors({
     origin: [process.env.CLIENT_URL, 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     preflightContinue: false,
@@ -30,6 +32,8 @@ connectDB();
 
 // auth
 app.use('/api/auth', authRoutes);
+// auth
+app.use('/api/admin', adminRoutes);
 // news
 app.use('/api/news', newsRoutes);
 // stock
@@ -46,6 +50,8 @@ app.use('/api/alerts', alertsRoutes);
 app.use('/api/orders', ordersRoutes);
 // ai-picks
 app.use('/api/ai', aiSuggestRoutes);
+// ai-chatbot
+app.use('/api/bot', chatBotRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
