@@ -1,4 +1,6 @@
+import 'dotenv/config';
 import express from "express";
+import axios from "axios";
 import csv from 'csv-parser';
 import YahooFinance from 'yahoo-finance2';
 import { Stock } from '../models/Stock.js';
@@ -49,33 +51,42 @@ router.get('/:symbol/history', async (req, res) => {
         const now = new Date();
         let period1 = new Date(now);
         const intervals = {
-            '1d': '5m',
-            '1w': '1h',
-            '1mo': '1d',
-            '1y': '1wk'
+            '1h': '1h',
+            'today': '8h',
+            '1d': '1day',
+            '1w': '1week',
+            '1mo': '1month',
         };
-        switch (range) {
-            case '1d':
-                period1 = new Date(Date.now() - 24 * 60 * 60 * 1000);
-                break;
-            case '1w':
-                period1 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-                break;
-            case '1mo':
-                period1 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-                break;
-            case '1y':
-                period1 = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
-                break;
-        };
+        // switch (range) {
+        //     case '1d':
+        //         period1 = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        //         break;
+        //     case '1w':
+        //         period1 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        //         break;
+        //     case '1mo':
+        //         period1 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        //         break;
+        //     case '1y':
+        //         period1 = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+        //         break;
+        // };
 
-        const result = await yahooFinance.chart(symbol.toUpperCase(), {
-            period1: period1,
-            period2: new Date(),
-            interval: intervals[range] || '1d',
-        });
+        // const result = await yahooFinance.chart(symbol.toUpperCase(), {
+        //     period1: period1,
+        //     period2: new Date(),
+        //     interval: intervals[range] || '1d',
+        // });
         // console.log('result ==>', result);
-        const data1 = result.quotes.map((quote) => ({
+
+        const response = await axios.get(`https://api.twelvedata.com/time_series?symbol=${symbol.toUpperCase()}&interval=${intervals[range] || '8h'}&apikey=${process.env.TWELVEDATA_API_KEY}`);
+
+        const result = await response.data;
+        if (result.status === 'error') {
+            return res.status(404).json({ success: false, message: result.message });
+        }
+
+        const data = result.values.map((quote) => ({
             date: quote.date,
             open: quote.open,
             high: quote.high,
@@ -83,7 +94,7 @@ router.get('/:symbol/history', async (req, res) => {
             close: quote.close,
             volume: quote.volume
         }));
-        res.status(200).json({ success: true, data: data1 });
+        res.status(200).json({ success: true, data });
     } catch (error) {
         console.error('Error fetching stock history data:', error);
         res.status(500).json({ success: false, message: error.message || 'Failed to fetch stock history data' });
