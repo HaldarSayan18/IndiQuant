@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 
 export default function CandleStick({ symbol, heading, isZoomed, isShow }) {
-    const [range, setRange] = useState("1y");
+    const [range, setRange] = useState("1mo");
     const [chartData, setChartData] = useState([]);
     const [loading, setLoading] = useState(true);
 

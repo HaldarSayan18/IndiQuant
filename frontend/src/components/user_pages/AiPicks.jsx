@@ -12,7 +12,7 @@ const AiPicks = () => {
         try {
             setLoading(true);
             const resp = await api.get('/api/ai/suggestions');
-            console.log(resp.data);
+            // console.log(resp.data);
             const mappedOutput = resp.data.aiPicks.map(item => ({
                 symbol: item.symbol,
                 name: item.name,
@@ -135,7 +135,7 @@ const AiPicks = () => {
                     <p className='col-span-full text-center'>No suggestions match this filter.</p>
                 ) : (
                     renewedSuggestions.map((item, index) => (
-                        <div key={index} className={`flex flex-col border-0 w-full h-60 md:h-48 lg:h-52 ${item.ai_suggest === 'Strong buy' ? 'bg-green-300/60' : item.ai_suggest === 'Watch' ? 'bg-amber-300/60' : item.ai_suggest === 'Avoid' ? 'bg-red-300/60' : 'bg-blue-300/60'} rounded-md rounded-b-lg`}>
+                        <div key={index} className={`flex flex-col border-0 w-full h-60 md:h-48 lg:h-60 ${item.ai_suggest === 'Strong buy' ? 'bg-green-300/60' : item.ai_suggest === 'Watch' ? 'bg-amber-300/60' : item.ai_suggest === 'Avoid' ? 'bg-red-300/60' : 'bg-blue-300/60'} rounded-md rounded-b-lg`}>
                             <div className={`w-full h-full border-0 flex flex-col items-stretch justify-start gap-2 rounded-md p-2 bg-linear-to-br from-[#0f1720f2] via-[#0a0f16f2] to-[#05070bf2] mt-1`}>
                                 <div className='flex items-center justify-between gap-2'>
                                     <div className='w-full flex flex-col gap-0 items-start justify-center'>
